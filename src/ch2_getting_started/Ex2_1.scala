@@ -1,3 +1,5 @@
+package ch2_getting_started
+
 /**
  * Write a recursive function to get the nth Fibonacci number (http://mng.bz/C29s).
  *

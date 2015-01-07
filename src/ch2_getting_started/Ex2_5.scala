@@ -1,3 +1,5 @@
+package ch2_getting_started
+
 /**
  * Implement the higher-order function that composes two functions.
  *

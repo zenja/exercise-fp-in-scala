@@ -1,3 +1,5 @@
+package ch2_getting_started
+
 /**
  * Implement uncurry, which reverses the transformation of curry. Note that since =>
  * associates to the right, A => (B => C) can be written as A => B => C.

@@ -1,3 +1,5 @@
+package ch2_getting_started
+
 /**
  * Let’s look at another example, currying, which converts a function f of two arguments
  * into a function of one argument that partially applies f. Here again there’s only one
