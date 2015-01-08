@@ -22,8 +22,16 @@ package ch3_functional_data_structures
  * match a predicate.
  *
  * def dropWhile[A](l: List[A], f: A => Boolean): List[A]
+ *
+ * Ex 3.6
+ * Not everything works out so nicely. Implement a function, init, that returns a List
+ * consisting of all but the last element of a List. So, given List(1,2,3,4), init will
+ * return List(1,2,3). Why can’t this function be implemented in constant time like
+ * tail?
+ *
+ * def init[A](l: List[A]): List[A]
  */
-object Ex3_2_3_4_5 {
+object Ex3_2_3_4_5_6 {
   sealed trait List[+A]
 
   case object Nil extends List[Nothing]
@@ -70,6 +78,18 @@ object Ex3_2_3_4_5 {
       case Cons(_, xs) => Cons(head, xs)
     }
 
+    def append[A](a1: List[A], a2: List[A]): List[A] =
+      a1 match {
+        case Nil => a2
+        case Cons(h,t) => Cons(h, append(t, a2))
+      }
+
+    def init[A](l: List[A]): List[A] =
+      l match {
+        case Nil => Nil
+        case Cons(x, Nil) => Nil
+        case Cons(h, t) => Cons(h, init(t))
+      }
   }
 
   def main(args: Array[String]): Unit = {
@@ -97,6 +117,11 @@ object Ex3_2_3_4_5 {
     println()
     println("Ex 3.5")
     println(List.dropWhile(List(1,2,3,4,5), (x: Int) => x < 3))
+
+    // Ex 3.6
+    println()
+    println("Ex 3.6")
+    println(List.init(List(1,2,3,4,5)))
   }
 
 }
