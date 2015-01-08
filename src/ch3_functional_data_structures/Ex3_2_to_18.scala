@@ -84,7 +84,7 @@ package ch3_functional_data_structures
  * Write a function that transforms a list of integers by adding 1 to each element.
  * (Reminder: this should be a pure function that returns a new List!)
  */
-object Ex3_2_to_16 {
+object Ex3_2_to_18 {
   sealed trait List[+A]
 
   case object Nil extends List[Nothing]
@@ -178,10 +178,10 @@ object Ex3_2_to_16 {
     def unzip[A](ll: List[List[A]]): List[A] =
       foldRight[List[A], List[A]](ll, Nil)(List.append(_, _))
 
-    def transform[A](l: List[A])(f: (A) => A): List[A] =
+    def map[A, B](l: List[A])(f: A => B): List[B] =
       l match {
         case Nil => Nil
-        case Cons(x, xs) => Cons(f(x), transform(xs)(f))
+        case Cons(x, xs) => Cons(f(x), map(xs)(f))
       }
   }
 
@@ -277,7 +277,12 @@ object Ex3_2_to_16 {
     // Ex 3.16
     println()
     println("Ex 3.16")
-    println(s"Transform List(1,2,3) by addind one: ${List.transform(List(1,2,3))(_ + 1)}")
+    println(s"Transform List(1,2,3) by addind one: ${List.map(List(1,2,3))(_ + 1)}")
+
+    // Ex 3.17 & 3.18
+    println()
+    println("Ex 3.17 & 3.18")
+    println(s"Transform List[Double] to List[String]: ${List.map(List(1.1, 2.2, 3.3))(_.toString)}")
   }
 
 }
