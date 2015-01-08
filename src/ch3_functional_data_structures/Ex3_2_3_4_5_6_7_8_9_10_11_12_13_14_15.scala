@@ -74,8 +74,13 @@ package ch3_functional_data_structures
  *
  * Ex 3.14
  * Implement append in terms of either foldLeft or foldRight.
+ *
+ * Ex 3.15
+ * Hard: Write a function that concatenates a list of lists into a single list.
+ * Its runtime should be linear in the total length of all lists.
+ * Try to use functions we have already defined.
  */
-object Ex3_2_3_4_5_6_7_8_9_10_11_12_13_14 {
+object Ex3_2_3_4_5_6_7_8_9_10_11_12_13_14_15 {
   sealed trait List[+A]
 
   case object Nil extends List[Nothing]
@@ -164,6 +169,10 @@ object Ex3_2_3_4_5_6_7_8_9_10_11_12_13_14 {
     def reverseR[A](as: List[A]): List[A] = foldRight[A, List[A]](as, Nil)((x, xs) => List.append(xs, List(x)))
     // reverse a list using foldLeft
     def reverseL[A](as: List[A]): List[A] = foldLeft[A, List[A]](as, Nil)((xs, x) => List.append(List(x), xs))
+
+    // concatenates a list of lists into a single list (ex 3.15)
+    def unzip[A](ll: List[List[A]]): List[A] =
+      foldRight[List[A], List[A]](ll, Nil)(List.append(_, _))
   }
 
   def main(args: Array[String]): Unit = {
@@ -249,6 +258,11 @@ object Ex3_2_3_4_5_6_7_8_9_10_11_12_13_14 {
     println()
     println("Ex 3.14")
     println(s"Append List(1,2,3) and List(4,5,6): ${List.appendR(List(1,2,3), List(4,5,6))}")
+
+    // Ex 3.15
+    println()
+    println("Ex 3.15")
+    println(s"Unzip List(List(1,2), List(3,4), List(5,6)): ${List.unzip(List(List(1,2), List(3,4), List(5,6)))}")
   }
 
 }
