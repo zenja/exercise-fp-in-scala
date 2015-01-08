@@ -16,8 +16,14 @@ package ch3_functional_data_structures
  * dropped—we don’t need to make a copy of the entire List.
  *
  * def drop[A](l: List[A], n: Int): List[A]
+ *
+ * Ex 3.5
+ * Implement dropWhile, which removes elements from the List prefix as long as they
+ * match a predicate.
+ *
+ * def dropWhile[A](l: List[A], f: A => Boolean): List[A]
  */
-object Ex3_2_3_4 {
+object Ex3_2_3_4_5 {
   sealed trait List[+A]
 
   case object Nil extends List[Nothing]
@@ -45,9 +51,19 @@ object Ex3_2_3_4 {
       case Cons(x, xs) => xs
     }
 
-    def drop[A](l: List[A], n: Int): List[A] =
-      if (n <= 0) l
-      else drop(List.tail(l), n - 1)
+    def drop[A](l: List[A], n: Int): List[A] = l match {
+      case Nil => Nil
+      case Cons(_, _) =>
+        if (n <= 0) l
+        else drop(List.tail(l), n - 1)
+    }
+
+    def dropWhile[A](l: List[A], f: A => Boolean): List[A] = l match {
+      case Nil => Nil
+      case Cons(x, xs) =>
+        if (f(x)) dropWhile(xs, f)
+        else l
+    }
 
     def setHead[A](l: List[A], head: A): List[A] = l match {
       case Nil => Cons(head, Nil)
@@ -76,6 +92,11 @@ object Ex3_2_3_4 {
     println(List.drop(Nil, 0))
     println(List.drop(Nil, 10))
     println(List.drop(List(1,2,3,4,5), 3))
+
+    // Ex 3.5
+    println()
+    println("Ex 3.5")
+    println(List.dropWhile(List(1,2,3,4,5), (x: Int) => x < 3))
   }
 
 }
