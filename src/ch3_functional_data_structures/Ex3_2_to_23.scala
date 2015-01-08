@@ -114,8 +114,17 @@ package ch3_functional_data_structures
  *
  * Ex 3.21
  * Use flatMap to implement filter.
+ *
+ * Ex 3.22
+ * Write a function that accepts two lists and constructs a new list
+ * by adding corresponding elements.
+ * For example, List(1,2,3) and List(4,5,6) become List(5,7,9).
+ *
+ * Ex 3.23
+ * Generalize the function you just wrote so that it’s not specific to integers or addition.
+ * Name your generalized function zipWith.
  */
-object Ex3_2_to_21 {
+object Ex3_2_to_23 {
   sealed trait List[+A]
 
   case object Nil extends List[Nothing]
@@ -231,6 +240,18 @@ object Ex3_2_to_21 {
 
     def filterViaFlatMap[A](as: List[A])(f: A => Boolean): List[A] =
       flatMap[A, A](as)(x => if (f(x)) List(x) else Nil)
+
+    // FIXME assume xs and ys has the same length
+    def zipWith[A](as: List[A], bs: List[A])(f: (A, A) => A): List[A] =
+      as match {
+        case Nil => Nil
+        case Cons(x, xs) =>
+          bs match {
+            case Nil => Nil
+            case Cons(y, ys) =>
+              Cons(f(x, y), zipWith(xs, ys)(f))
+          }
+      }
   }
 
   def main(args: Array[String]): Unit = {
@@ -346,6 +367,11 @@ object Ex3_2_to_21 {
     println()
     println("Ex 3.21")
     println(s"Remove all odd numbers from List(1,2,3,4,5,6): ${List.filterViaFlatMap(List(1,2,3,4,5,6))(_ % 2 == 0)}")
+
+    // Ex 3.22 & 3.23
+    println()
+    println("Ex 3.22 & 3.23")
+    println(s"Merge by adding for List(1,2,3) and List(10,20,30): ${List.zipWith(List(1,2,3), List(10,20,30))(_ + _)}")
   }
 
 }
