@@ -83,8 +83,26 @@ package ch3_functional_data_structures
  * Ex 3.16
  * Write a function that transforms a list of integers by adding 1 to each element.
  * (Reminder: this should be a pure function that returns a new List!)
+ *
+ * Ex 3.17
+ * Write a function that turns each value in a List[Double] into a String.
+ * You can use the expression d.toString to convert some d: Double to a String.
+ *
+ * Ex 3.18
+ * Write a function map that generalizes modifying each element in a list
+ * while maintaining the structure of the list.
+ * Here is its signature:
+ *
+ * def map[A,B](as: List[A])(f: A => B): List[B]
+ *
+ * Ex 3.19
+ * Write a function filter that removes elements from a list
+ * unless they satisfy a given predicate. Use it to remove all odd numbers from a List[Int].
+ *
+ * def filter[A](as: List[A])(f: A => Boolean): List[A]
+
  */
-object Ex3_2_to_18 {
+object Ex3_2_to_19 {
   sealed trait List[+A]
 
   case object Nil extends List[Nothing]
@@ -182,6 +200,14 @@ object Ex3_2_to_18 {
       l match {
         case Nil => Nil
         case Cons(x, xs) => Cons(f(x), map(xs)(f))
+      }
+
+    def filter[A](as: List[A])(f: A => Boolean): List[A] =
+      as match {
+        case Nil => Nil
+        case Cons(x, xs) =>
+          if (f(x)) Cons(x, filter(xs)(f))
+          else filter(xs)(f)
       }
   }
 
@@ -283,6 +309,11 @@ object Ex3_2_to_18 {
     println()
     println("Ex 3.17 & 3.18")
     println(s"Transform List[Double] to List[String]: ${List.map(List(1.1, 2.2, 3.3))(_.toString)}")
+
+    // Ex 3.19
+    println()
+    println("Ex 3.19")
+    println(s"Remove all odd numbers from List(1,2,3,4,5,6): ${List.filter(List(1,2,3,4,5,6))(_ % 2 == 0)}")
   }
 
 }
