@@ -42,8 +42,13 @@ package ch3_functional_data_structures
  * like this: foldRight(List(1,2,3), Nil:List[Int])(Cons(_,_)).
  * What do you think this says about the relationship between foldRight
  * and the data constructors of List?
+ *
+ * Ex 3.9
+ * Compute the length of a list using foldRight.
+ *
+ * def length[A](as: List[A]): Int
  */
-object Ex3_2_3_4_5_6_7_8 {
+object Ex3_2_3_4_5_6_7_8_9 {
   sealed trait List[+A]
 
   case object Nil extends List[Nothing]
@@ -112,6 +117,8 @@ object Ex3_2_3_4_5_6_7_8 {
         case Cons(x, Nil) => Nil
         case Cons(h, t) => Cons(h, init(t))
       }
+
+    def length[A](as: List[A]): Int = foldRight(as, 0)((_, z) => z + 1)
   }
 
   def main(args: Array[String]): Unit = {
@@ -159,8 +166,13 @@ object Ex3_2_3_4_5_6_7_8 {
     println()
     println("Ex 3.8")
     // WOW, the result of below code is Cons(1,Cons(2,Cons(3,Nil)))
-    // which indicates foldRight --> List structure (head, tail)
+    // which indicates foldRight has strong connection to List structure (head, tail)
     println(List.foldRight(List(1,2,3), Nil:List[Int])(Cons(_,_)))
+
+    // Ex 3.9
+    println()
+    println("Ex 3.9")
+    println(s"Length of List(1,2,3) is ${List.length(List(1,2,3))}")
   }
 
 }
