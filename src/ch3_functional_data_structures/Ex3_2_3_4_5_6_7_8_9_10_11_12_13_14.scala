@@ -71,8 +71,11 @@ package ch3_functional_data_structures
  * Implementing foldRight via foldLeft is useful because it lets us
  * implement foldRight tail-recursively, which means it works
  * even for large lists without overflowing the stack.
+ *
+ * Ex 3.14
+ * Implement append in terms of either foldLeft or foldRight.
  */
-object Ex3_2_3_4_5_6_7_8_9_10_11_12_13 {
+object Ex3_2_3_4_5_6_7_8_9_10_11_12_13_14 {
   sealed trait List[+A]
 
   case object Nil extends List[Nothing]
@@ -143,6 +146,9 @@ object Ex3_2_3_4_5_6_7_8_9_10_11_12_13 {
         case Nil => a2
         case Cons(h,t) => Cons(h, append(t, a2))
       }
+
+    // implement append() with foldRight()
+    def appendR[A](a1: List[A], a2: List[A]): List[A] = foldRight(a1, a2)((x:A, xs: List[A]) => Cons(x, xs))
 
     def init[A](l: List[A]): List[A] =
       l match {
@@ -238,6 +244,11 @@ object Ex3_2_3_4_5_6_7_8_9_10_11_12_13 {
     println()
     println("Ex 3.13")
     println(List.foldRightL(List(1,2,3), Nil:List[Int])(Cons(_,_)))
+
+    // Ex 3.14
+    println()
+    println("Ex 3.14")
+    println(s"Append List(1,2,3) and List(4,5,6): ${List.appendR(List(1,2,3), List(4,5,6))}")
   }
 
 }
