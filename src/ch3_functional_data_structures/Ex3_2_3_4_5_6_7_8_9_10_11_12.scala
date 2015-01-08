@@ -60,8 +60,12 @@ package ch3_functional_data_structures
  *
  * Ex 3.11
  * Write sum, product, and a function to compute the length of a list using foldLeft.
+ *
+ * Ex 3.12
+ * Write a function that returns the reverse of a list (given List(1,2,3) it returns List(3,2,1)).
+ * See if you can write it using a fold.
  */
-object Ex3_2_3_4_5_6_7_8_9_10_11 {
+object Ex3_2_3_4_5_6_7_8_9_10_11_12 {
   sealed trait List[+A]
 
   case object Nil extends List[Nothing]
@@ -133,6 +137,12 @@ object Ex3_2_3_4_5_6_7_8_9_10_11 {
       }
 
     def length[A](as: List[A]): Int = foldRight(as, 0)((_, z) => z + 1)
+
+    // TODO copied from others solution, understand it
+    // reverse a list using foldRight
+    def reverseR[A](as: List[A]): List[A] = foldRight[A, List[A]](as, Nil)((x, xs) => List.append(xs, List(x)))
+    // reverse a list using foldLeft
+    def reverseL[A](as: List[A]): List[A] = foldLeft[A, List[A]](as, Nil)((xs, x) => List.append(List(x), xs))
   }
 
   def main(args: Array[String]): Unit = {
@@ -195,12 +205,19 @@ object Ex3_2_3_4_5_6_7_8_9_10_11 {
       List.foldLeft(l, "")(_ + _)
     }
     println(s"Contents of List(1,2,3): ${_mkstring_ints(List(1,2,3))}")
+    println(s"Contents of List(1): ${_mkstring_ints(List(1))}")
 
     // Ex 3.11
     println()
     println("Ex 3.11")
     println(s"1 + 2 + 3 = ${List.sum_left(List(1,2,3))}")
     println(s"1 * 2 * 3 = ${List.product_left(List(1,2,3))}")
+
+    // Ex 3.12
+    println()
+    println("Ex 3.12")
+    println(s"Reverse of List(1,2,3) is: ${List.reverseL(List(1,2,3))}")
+    println(s"Reverse of List(1,2,3) is: ${List.reverseR(List(1,2,3))}")
   }
 
 }
