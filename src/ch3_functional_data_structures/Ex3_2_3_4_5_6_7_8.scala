@@ -36,8 +36,14 @@ package ch3_functional_data_structures
  * return 0.0 if it encounters a 0.0? Why or why not? Consider how any short-circuiting
  * might work if you call foldRight with a large list.
  * This is a deeper question that we’ll return to in chapter 5.
+ *
+ * Ex 3.8
+ * See what happens when you pass Nil and Cons themselves to foldRight,
+ * like this: foldRight(List(1,2,3), Nil:List[Int])(Cons(_,_)).
+ * What do you think this says about the relationship between foldRight
+ * and the data constructors of List?
  */
-object Ex3_2_3_4_5_6_7 {
+object Ex3_2_3_4_5_6_7_8 {
   sealed trait List[+A]
 
   case object Nil extends List[Nothing]
@@ -148,6 +154,13 @@ object Ex3_2_3_4_5_6_7 {
     // to answer the question:
     // using foldRight(), product() cannot have short-circuit conditions
     // TODO I cannot explain the reason
+
+    // Ex 3.8
+    println()
+    println("Ex 3.8")
+    // WOW, the result of below code is Cons(1,Cons(2,Cons(3,Nil)))
+    // which indicates foldRight --> List structure (head, tail)
+    println(List.foldRight(List(1,2,3), Nil:List[Int])(Cons(_,_)))
   }
 
 }
