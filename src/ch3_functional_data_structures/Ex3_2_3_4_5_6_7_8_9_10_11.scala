@@ -57,8 +57,11 @@ package ch3_functional_data_structures
  * Here is its signature:
  *
  * def foldLeft[A,B](as: List[A], z: B)(f: (B, A) => B): B
+ *
+ * Ex 3.11
+ * Write sum, product, and a function to compute the length of a list using foldLeft.
  */
-object Ex3_2_3_4_5_6_7_8_9_10 {
+object Ex3_2_3_4_5_6_7_8_9_10_11 {
   sealed trait List[+A]
 
   case object Nil extends List[Nothing]
@@ -78,20 +81,15 @@ object Ex3_2_3_4_5_6_7_8_9_10 {
         case Cons(x, xs) => foldLeft(xs, f(z, x))(f)
       }
 
-//    def sum(ints: List[Int]): Int = ints match {
-//      case Nil => 0
-//      case Cons(x, xs) => x + sum(xs)
-//    }
-
     def sum(ints: List[Int]): Int = List.foldRight(ints, 0)(_ + _)
 
-//    def product(ds: List[Double]): Double = ds match {
-//      case Nil => 1.0
-//      case Cons(0.0, _) => 0.0
-//      case Cons(x, xs) => x * product(xs)
-//    }
+    // sum() using foldLeft()
+    def sum_left(ints: List[Int]): Int = List.foldLeft(ints, 0)(_ + _)
 
     def product(ds: List[Double]): Double = foldRight(ds, 1.0)(_ * _)
+
+    // product() using foldLeft()
+    def product_left(ds: List[Double]): Double = foldLeft(ds, 1.0)(_ * _)
 
     def apply[A](as: A*): List[A] =
       if (as.isEmpty) Nil
@@ -197,6 +195,12 @@ object Ex3_2_3_4_5_6_7_8_9_10 {
       List.foldLeft(l, "")(_ + _)
     }
     println(s"Contents of List(1,2,3): ${_mkstring_ints(List(1,2,3))}")
+
+    // Ex 3.11
+    println()
+    println("Ex 3.11")
+    println(s"1 + 2 + 3 = ${List.sum_left(List(1,2,3))}")
+    println(s"1 * 2 * 3 = ${List.product_left(List(1,2,3))}")
   }
 
 }
