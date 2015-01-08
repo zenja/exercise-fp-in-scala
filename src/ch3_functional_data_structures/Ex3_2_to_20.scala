@@ -100,9 +100,19 @@ package ch3_functional_data_structures
  * unless they satisfy a given predicate. Use it to remove all odd numbers from a List[Int].
  *
  * def filter[A](as: List[A])(f: A => Boolean): List[A]
-
+ *
+ * Ex 3.20
+ * Write a function flatMap that works like map except that
+ * the function given will return a list instead of a single result,
+ * and that list should be inserted into the final resulting list.
+ * Here is its signature:
+ *
+ * def flatMap[A,B](as: List[A])(f: A => List[B]): List[B]
+ *
+ * For instance, flatMap(List(1,2,3))(i => List(i,i)) should result in
+ * List(1,1,2,2,3,3).
  */
-object Ex3_2_to_19 {
+object Ex3_2_to_20 {
   sealed trait List[+A]
 
   case object Nil extends List[Nothing]
@@ -209,6 +219,12 @@ object Ex3_2_to_19 {
           if (f(x)) Cons(x, filter(xs)(f))
           else filter(xs)(f)
       }
+
+    def flatMap[A,B](as: List[A])(f: A => List[B]): List[B] =
+      as match {
+        case Nil => Nil
+        case Cons(x, xs) => List.append(f(x), flatMap(xs)(f))
+      }
   }
 
   def main(args: Array[String]): Unit = {
@@ -314,6 +330,11 @@ object Ex3_2_to_19 {
     println()
     println("Ex 3.19")
     println(s"Remove all odd numbers from List(1,2,3,4,5,6): ${List.filter(List(1,2,3,4,5,6))(_ % 2 == 0)}")
+
+    // Ex 3.20
+    println()
+    println("Ex 3.20")
+    println(s"Duplicate each elements for 3 times for List(1,2,3): ${List.flatMap(List(1,2,3))(x => List(x,x,x))}")
   }
 
 }
