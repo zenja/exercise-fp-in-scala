@@ -47,8 +47,18 @@ package ch3_functional_data_structures
  * Compute the length of a list using foldRight.
  *
  * def length[A](as: List[A]): Int
+ *
+ * Ex 3.10
+ * Our implementation of foldRight is not tail-recursive and will result in
+ * a StackOverflowError for large lists (we say it’s not stack-safe).
+ * Convince yourself that this is the case,
+ * and then write another general list-recursion function, foldLeft,
+ * that is tail-recursive, using the techniques we discussed in the previous chapter.
+ * Here is its signature:
+ *
+ * def foldLeft[A,B](as: List[A], z: B)(f: (B, A) => B): B
  */
-object Ex3_2_3_4_5_6_7_8_9 {
+object Ex3_2_3_4_5_6_7_8_9_10 {
   sealed trait List[+A]
 
   case object Nil extends List[Nothing]
@@ -60,6 +70,12 @@ object Ex3_2_3_4_5_6_7_8_9 {
       as match {
         case Nil => z
         case Cons(x, xs) => f(x, foldRight(xs, z)(f))
+      }
+
+    def foldLeft[A,B](as: List[A], z: B)(f: (B, A) => B): B =
+      as match {
+        case Nil => z
+        case Cons(x, xs) => foldLeft(xs, f(z, x))(f)
       }
 
 //    def sum(ints: List[Int]): Int = ints match {
@@ -173,6 +189,14 @@ object Ex3_2_3_4_5_6_7_8_9 {
     println()
     println("Ex 3.9")
     println(s"Length of List(1,2,3) is ${List.length(List(1,2,3))}")
+
+    // Ex 3.10
+    println()
+    println("Ex 3.10")
+    def _mkstring_ints(l: List[Int]): String = {
+      List.foldLeft(l, "")(_ + _)
+    }
+    println(s"Contents of List(1,2,3): ${_mkstring_ints(List(1,2,3))}")
   }
 
 }
