@@ -66,10 +66,10 @@ object Ex3_2_3_4_5_6 {
         else drop(List.tail(l), n - 1)
     }
 
-    def dropWhile[A](l: List[A], f: A => Boolean): List[A] = l match {
+    def dropWhile[A](l: List[A])(f: A => Boolean): List[A] = l match {
       case Nil => Nil
       case Cons(x, xs) =>
-        if (f(x)) dropWhile(xs, f)
+        if (f(x)) dropWhile(xs)(f)
         else l
     }
 
@@ -116,7 +116,7 @@ object Ex3_2_3_4_5_6 {
     // Ex 3.5
     println()
     println("Ex 3.5")
-    println(List.dropWhile(List(1,2,3,4,5), (x: Int) => x < 3))
+    println(List.dropWhile(List(1,2,3,4,5))(_ < 3))
 
     // Ex 3.6
     println()
