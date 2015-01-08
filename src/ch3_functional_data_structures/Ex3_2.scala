@@ -1,9 +1,11 @@
 package ch3_functional_data_structures
 
 /**
- * What will the result of the following match expression be?
+ * Implement the function tail for removing the first element of a List. Note that the
+ * function takes constant time. What are different choices you could make in your
+ * implementation if the List is Nil? We’ll return to this question in the next chapter.
  */
-object Ex3_1 {
+object Ex3_2 {
   sealed trait List[+A]
 
   case object Nil extends List[Nothing]
@@ -25,19 +27,18 @@ object Ex3_1 {
     def apply[A](as: A*): List[A] =
       if (as.isEmpty) Nil
       else Cons(as.head, apply(as.tail: _*))
+
+    def tail[A](l: List[A]): List[A] = l match {
+      case Nil => Nil
+      case Cons(x, xs) => xs
+    }
+
   }
 
   def main(args: Array[String]): Unit = {
-    val x = List(1, 2, 3, 4, 5) match {
-      case Cons(x, Cons(2, Cons(4, _))) => x
-      case Nil => 42
-      case Cons(x, Cons(y, Cons(3, Cons(4, _)))) => x + y
-      case Cons(h, t) => h + List.sum(t)
-      case _ => 101
-    }
-
-    println(s"Expected: 3; Actual: ${x}")
+    val l = List(1,2,3,4,5)
+    val lTail = List.tail(l)
+    println(lTail)
   }
 
 }
-
