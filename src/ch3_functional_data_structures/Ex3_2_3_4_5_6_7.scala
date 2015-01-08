@@ -30,8 +30,14 @@ package ch3_functional_data_structures
  * tail?
  *
  * def init[A](l: List[A]): List[A]
+ *
+ * Ex 3.7
+ * Can product, implemented using foldRight, immediately halt the recursion and
+ * return 0.0 if it encounters a 0.0? Why or why not? Consider how any short-circuiting
+ * might work if you call foldRight with a large list.
+ * This is a deeper question that we’ll return to in chapter 5.
  */
-object Ex3_2_3_4_5_6 {
+object Ex3_2_3_4_5_6_7 {
   sealed trait List[+A]
 
   case object Nil extends List[Nothing]
@@ -39,16 +45,26 @@ object Ex3_2_3_4_5_6 {
   case class Cons[+A](head: A, tail: List[A]) extends List[A]
 
   object List {
-    def sum(ints: List[Int]): Int = ints match {
-      case Nil => 0
-      case Cons(x, xs) => x + sum(xs)
-    }
+    def foldRight[A,B](as: List[A], z: B)(f: (A, B) => B): B =
+      as match {
+        case Nil => z
+        case Cons(x, xs) => f(x, foldRight(xs, z)(f))
+      }
 
-    def product(ds: List[Double]): Double = ds match {
-      case Nil => 1.0
-      case Cons(0.0, _) => 0.0
-      case Cons(x, xs) => x * product(xs)
-    }
+//    def sum(ints: List[Int]): Int = ints match {
+//      case Nil => 0
+//      case Cons(x, xs) => x + sum(xs)
+//    }
+
+    def sum(ints: List[Int]): Int = List.foldRight(ints, 0)(_ + _)
+
+//    def product(ds: List[Double]): Double = ds match {
+//      case Nil => 1.0
+//      case Cons(0.0, _) => 0.0
+//      case Cons(x, xs) => x * product(xs)
+//    }
+
+    def product(ds: List[Double]): Double = foldRight(ds, 1.0)(_ * _)
 
     def apply[A](as: A*): List[A] =
       if (as.isEmpty) Nil
@@ -122,6 +138,16 @@ object Ex3_2_3_4_5_6 {
     println()
     println("Ex 3.6")
     println(List.init(List(1,2,3,4,5)))
+
+    // Ex 3.7
+    println()
+    println("Ex 3.7")
+    // test sum and product after rewrote with foldRight
+    println(s"1 + 2 + 3 = ${List.sum(List(1,2,3))}")
+    println(s"1 * 2 * 3 = ${List.product(List(1,2,3))}")
+    // to answer the question:
+    // using foldRight(), product() cannot have short-circuit conditions
+    // TODO I cannot explain the reason
   }
 
 }
