@@ -111,8 +111,11 @@ package ch3_functional_data_structures
  *
  * For instance, flatMap(List(1,2,3))(i => List(i,i)) should result in
  * List(1,1,2,2,3,3).
+ *
+ * Ex 3.21
+ * Use flatMap to implement filter.
  */
-object Ex3_2_to_20 {
+object Ex3_2_to_21 {
   sealed trait List[+A]
 
   case object Nil extends List[Nothing]
@@ -225,6 +228,9 @@ object Ex3_2_to_20 {
         case Nil => Nil
         case Cons(x, xs) => List.append(f(x), flatMap(xs)(f))
       }
+
+    def filterViaFlatMap[A](as: List[A])(f: A => Boolean): List[A] =
+      flatMap[A, A](as)(x => if (f(x)) List(x) else Nil)
   }
 
   def main(args: Array[String]): Unit = {
@@ -335,6 +341,11 @@ object Ex3_2_to_20 {
     println()
     println("Ex 3.20")
     println(s"Duplicate each elements for 3 times for List(1,2,3): ${List.flatMap(List(1,2,3))(x => List(x,x,x))}")
+
+    // Ex 3.21
+    println()
+    println("Ex 3.21")
+    println(s"Remove all odd numbers from List(1,2,3,4,5,6): ${List.filterViaFlatMap(List(1,2,3,4,5,6))(_ % 2 == 0)}")
   }
 
 }
