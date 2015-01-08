@@ -64,8 +64,15 @@ package ch3_functional_data_structures
  * Ex 3.12
  * Write a function that returns the reverse of a list (given List(1,2,3) it returns List(3,2,1)).
  * See if you can write it using a fold.
+ *
+ * Ex 3.13 TODO check correctness
+ * Hard: Can you write foldLeft in terms of foldRight?
+ * How about the other way around?
+ * Implementing foldRight via foldLeft is useful because it lets us
+ * implement foldRight tail-recursively, which means it works
+ * even for large lists without overflowing the stack.
  */
-object Ex3_2_3_4_5_6_7_8_9_10_11_12 {
+object Ex3_2_3_4_5_6_7_8_9_10_11_12_13 {
   sealed trait List[+A]
 
   case object Nil extends List[Nothing]
@@ -84,6 +91,14 @@ object Ex3_2_3_4_5_6_7_8_9_10_11_12 {
         case Nil => z
         case Cons(x, xs) => foldLeft(xs, f(z, x))(f)
       }
+
+    // implement foldRight using foldLeft
+    def foldRightL[A,B](as: List[A], z: B)(f: (A, B) => B): B =
+      foldLeft(List.reverseL(as), z)((a, b) => f(b, a))
+
+    // implement foldLeft using foldRight
+    def foldLeftR[A,B](as: List[A], z: B)(f: (B, A) => B): B =
+      foldRight(List.reverseL(as), z)((a, b) => f(b, a))
 
     def sum(ints: List[Int]): Int = List.foldRight(ints, 0)(_ + _)
 
@@ -218,6 +233,11 @@ object Ex3_2_3_4_5_6_7_8_9_10_11_12 {
     println("Ex 3.12")
     println(s"Reverse of List(1,2,3) is: ${List.reverseL(List(1,2,3))}")
     println(s"Reverse of List(1,2,3) is: ${List.reverseR(List(1,2,3))}")
+
+    // Ex 3.13
+    println()
+    println("Ex 3.13")
+    println(List.foldRightL(List(1,2,3), Nil:List[Int])(Cons(_,_)))
   }
 
 }
