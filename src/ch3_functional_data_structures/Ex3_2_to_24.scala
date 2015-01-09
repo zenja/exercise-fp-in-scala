@@ -123,8 +123,18 @@ package ch3_functional_data_structures
  * Ex 3.23
  * Generalize the function you just wrote so that it’s not specific to integers or addition.
  * Name your generalized function zipWith.
+ *
+ * Ex 3.24
+ * Hard: As an example, implement hasSubsequence for checking whether a List
+ * contains another List as a subsequence.
+ * For instance, List(1,2,3,4) would have List(1,2), List(2,3), and List(4) as subsequences, among others.
+ * You may have some difficulty finding a concise purely functional implementation that is also efficient.
+ * That’s okay. Implement the function however comes most naturally.
+ * We’ll return to this implementation in chapter 5 and hopefully improve on it.
+ *
+ * def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean
  */
-object Ex3_2_to_23 {
+object Ex3_2_to_24 {
   sealed trait List[+A]
 
   case object Nil extends List[Nothing]
@@ -252,6 +262,20 @@ object Ex3_2_to_23 {
               Cons(f(x, y), zipWith(xs, ys)(f))
           }
       }
+
+    def startWith[A](l: List[A], prefix: List[A]): Boolean =
+      (l, prefix) match {
+        case (_, Nil) => true
+        case (Cons(h1,t1), Cons(h2, t2)) if h1 == h2 => startWith(t1, t2)
+        case _ => false
+      }
+
+    def hasSubSequence[A](l: List[A], sub: List[A]): Boolean =
+      l match {
+        case Nil => false
+        case Cons(x, xs) if startWith(l, sub) => true
+        case Cons(x, xs) => hasSubSequence(xs, sub)
+      }
   }
 
   def main(args: Array[String]): Unit = {
@@ -372,6 +396,16 @@ object Ex3_2_to_23 {
     println()
     println("Ex 3.22 & 3.23")
     println(s"Merge by adding for List(1,2,3) and List(10,20,30): ${List.zipWith(List(1,2,3), List(10,20,30))(_ + _)}")
+
+    // Ex 3.24
+    println()
+    println("Ex 3.24")
+    println(s"Is List(1,2,3,4) contains List(1,2): ${List.hasSubSequence(List(1,2,3,4), List(1,2))}")
+    println(s"Is List(1,2,3,4) contains List(3): ${List.hasSubSequence(List(1,2,3,4), List(3))}")
+    println(s"Is List(1,2,3,4) contains List(3,4): ${List.hasSubSequence(List(1,2,3,4), List(3,4))}")
+    println(s"Is List(1,2,3,4) contains Nil: ${List.hasSubSequence(List(1,2,3,4), Nil)}")
+    println(s"Is List(1,2,1,3,4) contains List(1,3): ${List.hasSubSequence(List(1,2,1,3,4), List(1,3))}")
+    println(s"Is List(1,2,1,3,4) contains List(1,4): ${List.hasSubSequence(List(1,2,1,3,4), List(1,4))}")
   }
 
 }
