@@ -7,6 +7,9 @@ package ch3_functional_data_structures
  * Ex 3.26
  * Write a function maximum that returns the maximum element in a Tree[Int].
  * (Note: In Scala, you can use x.max(y) or x max y to compute the maximum of two integers x andy.)
+ *
+ * Ex 3.27
+ * Write a function depth that returns the maximum path length from the root of a tree to any leaf.
  */
 object Ex3_tree {
   sealed trait Tree[+A]
@@ -25,6 +28,12 @@ object Ex3_tree {
         case Leaf(v) => v
         case Branch(l ,r) => maxElement(l) max maxElement(r)
       }
+
+    def depth[A](t: Tree[A]): Int =
+      t match {
+        case Leaf(_) => 1
+        case Branch(l, r) => 1 + (depth(l) max depth(r))
+      }
   }
 
   def main(args: Array[String]): Unit = {
@@ -38,5 +47,10 @@ object Ex3_tree {
     println()
     println("Ex 3.26")
     println(s"Max element of ${t1}: ${Tree.maxElement(t1)}")
+
+    // Ex 3.27
+    println()
+    println("Ex 3.27")
+    println(s"Depth of ${t1}: ${Tree.depth(t1)}")
   }
 }
