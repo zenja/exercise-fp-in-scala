@@ -134,7 +134,7 @@ package ch3_functional_data_structures
  *
  * def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean
  */
-object Ex3_2_to_24 {
+object Ex3_list {
   sealed trait List[+A]
 
   case object Nil extends List[Nothing]
