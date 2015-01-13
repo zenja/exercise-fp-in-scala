@@ -14,6 +14,13 @@ package ch3_functional_data_structures
  *    is None, returns the given default value.
  * 4. orElse returns the first Option if it’s defined; otherwise,
  *    it returns the second Option.
+ *
+ * Ex 4.2
+ * Implement the variance function in terms of flatMap.
+ * If the mean of a sequence is m, the variance is the mean of math.pow(x - m, 2)
+ * for each element x in the sequence. See the definition of variance on Wikipedia (http://mng.bz/0Qsr).
+ *
+ * def variance(xs: Seq[Double]): Option[Double]
  */
 object Ex4_Option {
   sealed trait Option[+A] {
@@ -67,6 +74,17 @@ object Ex4_Option {
   case class Some[+A](get: A) extends Option[A]
   case object None extends Option[Nothing]
 
+  object Option {
+    def mean(xs: Seq[Double]): Option[Double] = {
+      if (xs.isEmpty) None
+      else Some(xs.sum / xs.length)
+    }
+
+    def variance(xs: Seq[Double]): Option[Double] = {
+      mean(xs) flatMap (m => mean(xs.map(x => math.pow(x - m, 2))))
+    }
+  }
+
   def main(args: Array[String]): Unit = {
     val noneInt: Option[Int] = None
     // Ex 4.1
@@ -85,5 +103,10 @@ object Ex4_Option {
     println(noneInt.getOrElse(100))
     println(noneInt.orElse(Some(100)))
     println(noneInt.filter(_ % 2 == 0))
+
+    // Ex 4.2
+    println("\nEx4.2")
+    println(s"Var(1,2,3,4,5): ${Option.variance(Seq(1.0, 2.0, 3.0, 4.0, 5.0))}")
+    println(s"Var(empty list): ${Option.variance(Seq())}")
   }
 }
