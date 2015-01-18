@@ -21,6 +21,12 @@ package ch3_functional_data_structures
  * for each element x in the sequence. See the definition of variance on Wikipedia (http://mng.bz/0Qsr).
  *
  * def variance(xs: Seq[Double]): Option[Double]
+ *
+ * Ex 4.3
+ * Write a generic function map2 that combines two Option values using a binary function.
+ * If either Option value is None, then the return value is too. Here is its signature:
+ *
+ * def map2[A,B,C](a: Option[A], b: Option[B])(f: (A, B) => C): Option[C]
  */
 object Ex4_Option {
   sealed trait Option[+A] {
@@ -42,6 +48,7 @@ object Ex4_Option {
     def flatMap[B](f: A => Option[B]): Option[B] = {
       map(f) getOrElse None
     }
+
     def getOrElse[B >: A](default: => B): B = {
       this match {
         case None => default
@@ -83,6 +90,15 @@ object Ex4_Option {
     def variance(xs: Seq[Double]): Option[Double] = {
       mean(xs) flatMap (m => mean(xs.map(x => math.pow(x - m, 2))))
     }
+
+    def map2[A,B,C](a: Option[A], b: Option[B])(f: (A, B) => C): Option[C] = {
+      (a, b) match {
+        case (Some(x), Some(y)) => Some(f(x, y))
+        case _ => None
+      }
+      // in https://github.com/fpinscala/fpinscala/blob/master/answerkey%2Ferrorhandling%2F03.answer.scala:
+      // a flatMap (aa => b map (bb => f(aa, bb)))
+    }
   }
 
   def main(args: Array[String]): Unit = {
@@ -108,5 +124,10 @@ object Ex4_Option {
     println("\nEx4.2")
     println(s"Var(1,2,3,4,5): ${Option.variance(Seq(1.0, 2.0, 3.0, 4.0, 5.0))}")
     println(s"Var(empty list): ${Option.variance(Seq())}")
+
+    // Ex 4.3
+    println("\nEx4.3")
+    println(Option.map2(Some(1), Some(2))(_ + _))
+    println(Option.map2(Some(1), noneInt)(_ + _))
   }
 }
