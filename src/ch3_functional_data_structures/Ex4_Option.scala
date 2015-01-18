@@ -27,6 +27,14 @@ package ch3_functional_data_structures
  * If either Option value is None, then the return value is too. Here is its signature:
  *
  * def map2[A,B,C](a: Option[A], b: Option[B])(f: (A, B) => C): Option[C]
+ *
+ * Ex 4.4
+ * Write a function sequence that combines a list of Options into one Option
+ * containing a list of all the Some values in the original list.
+ * If the original list contains None even once, the result of the function should be None;
+ * otherwise the result should be Some with a list of all the values. Here is its signature:
+ *
+ * def sequence[A](a: List[Option[A]]): Option[List[A]]
  */
 object Ex4_Option {
   sealed trait Option[+A] {
@@ -99,6 +107,17 @@ object Ex4_Option {
       // in https://github.com/fpinscala/fpinscala/blob/master/answerkey%2Ferrorhandling%2F03.answer.scala:
       // a flatMap (aa => b map (bb => f(aa, bb)))
     }
+
+    // TODO copied, understand it
+    def sequence[A](a: List[Option[A]]): Option[List[A]] = {
+      a match {
+        case Nil => Some(Nil)
+        case h :: t => h flatMap (hh => sequence(t) map (hh :: _))
+      }
+      // another solution:
+      // a.foldRight[Option[List[A]]](Some(Nil))((x,y) => map2(x,y)(_ :: _))
+    }
+
   }
 
   def main(args: Array[String]): Unit = {
@@ -129,5 +148,10 @@ object Ex4_Option {
     println("\nEx4.3")
     println(Option.map2(Some(1), Some(2))(_ + _))
     println(Option.map2(Some(1), noneInt)(_ + _))
+
+    // Ex 4.4
+    println("\nEx4.4")
+    println(Option.sequence(List(Some(1), Some(2), Some(3))))
+    println(Option.sequence(List(Some(1), noneInt, Some(3))))
   }
 }
