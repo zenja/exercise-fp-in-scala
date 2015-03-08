@@ -35,6 +35,14 @@ package ch3_functional_data_structures
  * otherwise the result should be Some with a list of all the values. Here is its signature:
  *
  * def sequence[A](a: List[Option[A]]): Option[List[A]]
+ *
+ * Ex 4.5
+ *
+ * def traverse[A, B](a: List[A])(f: A => Option[B]): Option[List[B]]
+ *
+ * Implement this function. It’s straightforward to do using map and sequence,
+ * but try for a more efficient implementation that only looks at the list once.
+ * In fact, implement sequence in terms of traverse.
  */
 object Ex4_Option {
   sealed trait Option[+A] {
@@ -118,6 +126,20 @@ object Ex4_Option {
       // a.foldRight[Option[List[A]]](Some(Nil))((x,y) => map2(x,y)(_ :: _))
     }
 
+    def traverse[A, B](a: List[A])(f: A => Option[B]): Option[List[B]] = {
+      a match {
+        case Nil => Some(Nil)
+        case h :: t => f(h) flatMap (fh => traverse(t)(f) map (fh :: _))
+        // solution from fpinscala Github:
+        // case h::t => map2(f(h), traverse(t)(f))(_ :: _)
+        // another solution:
+        // a.foldRight[Option[List[B]]](Some(Nil))((h,t) => map2(f(h),t)(_ :: _))
+      }
+    }
+
+    def sequenceByTraverse[A](a: List[Option[A]]): Option[List[A]] =
+      traverse(a)(x => x)
+
   }
 
   def main(args: Array[String]): Unit = {
@@ -153,5 +175,10 @@ object Ex4_Option {
     println("\nEx4.4")
     println(Option.sequence(List(Some(1), Some(2), Some(3))))
     println(Option.sequence(List(Some(1), noneInt, Some(3))))
+
+    // Ex 4.5
+    println("\nEx4.5")
+    println(Option.sequenceByTraverse(List(Some(1), Some(2), Some(3))))
+    println(Option.sequenceByTraverse(List(Some(1), noneInt, Some(3))))
   }
 }
