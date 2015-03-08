@@ -114,6 +114,12 @@ object Ex4_Option {
       }
       // in https://github.com/fpinscala/fpinscala/blob/master/answerkey%2Ferrorhandling%2F03.answer.scala:
       // a flatMap (aa => b map (bb => f(aa, bb)))
+      //
+      // or to use for-comprehension:
+      // for {
+      //   aa <- a
+      //   bb <- b
+      // } yield f(aa, bb)
     }
 
     // TODO copied, understand it
