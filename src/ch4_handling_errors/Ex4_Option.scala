@@ -1,4 +1,4 @@
-package ch3_functional_data_structures
+package ch4_handling_errors
 
 /**
  * Ex 4.1

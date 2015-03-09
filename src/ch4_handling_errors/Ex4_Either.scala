@@ -1,6 +1,4 @@
-package ch3_functional_data_structures
-
-import sun.reflect.generics.reflectiveObjects.NotImplementedException
+package ch4_handling_errors
 
 /**
  * Ex 4.6
