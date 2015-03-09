@@ -8,6 +8,10 @@ package ch5_strictness_and_laziness
  * You can place this and other functions that operate on a Stream inside the Stream trait.
  *
  * def toList: List[A]
+ *
+ * Ex 5.2
+ * Write the function take(n) for returning the first n elements of a Stream,
+ * and drop(n) for skipping the first n elements of a Stream.
  */
 object Ex5_Stream {
   sealed trait Stream[+A] {
@@ -27,6 +31,29 @@ object Ex5_Stream {
 
       go(this, List()).reverse
     }
+
+    def take(n: Int): Stream[A] =
+      /* My ugly solution:
+      if (n <= 0)
+        return Empty
+      else
+        return this match {
+          case Cons(h, t) => Stream.cons(h(), t().take(n - 1))
+          case _ => Empty
+        }
+      */
+      // solution from fpinscala Github
+      this match {
+        case Cons(h, t) if n > 1 => Stream.cons(h(), t().take(n - 1))
+        case Cons(h, _) if n == 1 => Stream.cons(h(), Empty)
+        case _ => Empty
+      }
+
+    def drop(n: Int): Stream[A] =
+      this match {
+        case Cons(_, t) if n >= 1 => t().drop(n - 1)
+        case _ => this
+      }
   }
 
   case class Cons[+A](h: () => A, t: () => Stream[A]) extends Stream[A]
@@ -54,6 +81,15 @@ object Ex5_Stream {
     assert(es.toListNotTailRecursive == List(), "toListNotTailRecursive test case 2")
     assert(s.toList == List(0, 1, 2), "toList test case 1")
     assert(es.toList == List(), "toList test case 2")
+
+    // Ex 5.2
+    assert(s.take(2).toList == List(0, 1), "take test case 1")
+    assert(s.take(-1).toList == List(), "take test case 2")
+    assert(es.take(1).toList == List(), "take test case 3")
+
+    assert(s.drop(1).toList == List(1, 2), "drop test case 1")
+    assert(s.drop(100).toList == List(), "drop test case 1")
+    assert(s.drop(-1).toList == s.toList, "drop test case 1")
 
     println("All tests finished.")
   }
