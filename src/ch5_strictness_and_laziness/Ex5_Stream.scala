@@ -61,6 +61,13 @@ package ch5_strictness_and_laziness
  *
  * Ex 5.12
  * Write fibs, from, constant, and ones in terms of unfold.
+ *
+ * Ex 5.13
+ * Use unfold to implement map, take, takeWhile, zipWith (as in chapter 3), and zipAll.
+ * The zipAll function should continue the traversal as long as either stream has more elements,
+ * it uses Option to indicate whether each stream has been exhausted.
+ *
+ * def zipAll[B](s2: Stream[B]): Stream[(Option[A],Option[B])]
  */
 object Ex5_Stream {
   sealed trait Stream[+A] {
@@ -163,6 +170,50 @@ object Ex5_Stream {
 
     def flatMap[B](f: A => Stream[B]): Stream[B] =
       foldRight(Stream.empty[B])((h, t) => f(h) append t)
+
+    def mapViaUnfold[B](f: A => B): Stream[B] =
+      // Next State: the remaining sub-stream to be mapped: remain_s
+      // Generate current value from current state: the head of current state(which is a stream)
+      // State transfer: the tail of current state(stream)
+      Stream.unfold(this) {
+        case Cons(h, t) => Some(f(h()), t())
+        case _ => None
+      }
+
+    def takeViaUnfold(n: Int): Stream[A] =
+      // the n and the remaining list together constitute a state;
+      // neither can be a state along
+      Stream.unfold((this, n)) {
+        case (Cons(h, t), nn) if nn > 1 => Some(h() ,(t(), n - 1))
+        case (Cons(h, t), 1) => Some(h(), (Empty, 0))
+        case _ => None
+      }
+
+    def takeWhileViaUnfold(p: A => Boolean): Stream[A] =
+      Stream.unfold(this) {
+        case Cons(h, t) if p(h()) => Some(h(), t())
+        case _ => None
+      }
+
+    def zipWith[B, C](s2: Stream[B])(f: (A, B) => C): Stream[C] =
+      (this, s2) match {
+        case (Cons(h1, t1), Cons(h2, t2)) => Stream.cons(f(h1(), h2()), t1().zipWith(t2())(f))
+        case _ => Empty
+      }
+
+    def zipWithViaUnfold[B, C](s2: Stream[B])(f: (A, B) => C): Stream[C] =
+      Stream.unfold(this, s2) {
+        case (Cons(h1, t1), Cons(h2, t2)) => Some(f(h1(), h2()), (t1(), t2()))
+        case _ => None
+      }
+
+    def zipAll[B](s2: Stream[B]): Stream[(Option[A], Option[B])] =
+      Stream.unfold(this, s2) {
+        case (Cons(h1, t1), Cons(h2, t2)) => Some((Some(h1()), Some(h2())), (t1(), t2()))
+        case (Cons(h1, t1), _) => Some((Some(h1()), None), (t1(), Empty))
+        case (_, Cons(h2, t2)) => Some((None, Some(h2())), (Empty, t2()))
+        case _ => None
+      }
   }
 
   case class Cons[+A](h: () => A, t: () => Stream[A]) extends Stream[A]
@@ -217,6 +268,8 @@ object Ex5_Stream {
 
   def main(args: Array[String]): Unit = {
     val s: Stream[Int] = Stream.cons(0, Stream.cons(1, Stream.cons(2, Empty)))
+    val s2: Stream[Int] = Stream.cons(0, Stream.cons(10, Stream.cons(20, Empty)))
+    val s3: Stream[Int] = Stream.cons(0, Stream.cons(10, Empty))
     val es: Stream[Int] = Empty
 
     // Ex 5.1
@@ -289,6 +342,27 @@ object Ex5_Stream {
     assert(Stream.constantViaUnfold(9).take(3).toList == List(9, 9, 9), "constantViaUnfold test case 1")
 
     assert(Stream.onesViaUnfold().take(5).toList == List(1, 1, 1, 1, 1), "onesViaUnfold test case 1")
+
+    // Ex 5.13
+    assert(s.mapViaUnfold(_ * 2).toList == List(0, 2, 4), "mapViaUnfold test case 1")
+    assert(es.mapViaUnfold(_ * 2).toList == List(), "mapViaUnfold test case 2")
+
+    assert(s.takeViaUnfold(2).toList == List(0, 1), "takeViaUnfold test case 1")
+    assert(s.takeViaUnfold(-1).toList == List(), "takeViaUnfold test case 2")
+    assert(es.takeViaUnfold(1).toList == List(), "takeViaUnfold test case 3")
+
+    assert(s.takeWhileViaUnfold(_ => false).toList == List(), "takeWhileViaUnfold test case 1")
+    assert(s.takeWhileViaUnfold(_ < 2).toList == List(0, 1), "takeWhileViaUnfold test case 2")
+    assert(s.takeWhileViaUnfold(_ < 10).toList == List(0, 1, 2), "takeWhileViaUnfold test case 3")
+
+    assert(s.zipWith(s2)(_ + _).toList == List(0, 11, 22), "zipWith test case 1")
+    assert(s.zipWith(es)(_ + _).toList == List(), "zipWith test case 2")
+
+    assert(s.zipWithViaUnfold(s2)(_ + _).toList == List(0, 11, 22), "zipWithViaUnfold test case 1")
+    assert(s.zipWithViaUnfold(es)(_ + _).toList == List(), "zipWithViaUnfold test case 2")
+
+    assert(s.zipAll(s3).toList == List((Some(0), Some(0)), (Some(1), Some(10)), (Some(2), None)), "zipAll test case 1")
+    assert(s.zipAll(es).toList == List((Some(0), None), (Some(1), None), (Some(2), None)), "zipAll test case 1")
 
     println("All tests finished.")
   }
