@@ -251,8 +251,8 @@ object Ex3_list {
     def filterViaFlatMap[A](as: List[A])(f: A => Boolean): List[A] =
       flatMap[A, A](as)(x => if (f(x)) List(x) else Nil)
 
-    // FIXME assume xs and ys has the same length
-    def zipWith[A](as: List[A], bs: List[A])(f: (A, A) => A): List[A] =
+    def zipWith[A, B, C](as: List[A], bs: List[B])(f: (A, B) => C): List[C] =
+      /* my ugly solution:
       as match {
         case Nil => Nil
         case Cons(x, xs) =>
@@ -261,6 +261,12 @@ object Ex3_list {
             case Cons(y, ys) =>
               Cons(f(x, y), zipWith(xs, ys)(f))
           }
+      }
+      */
+      (as, bs) match {
+        case (Nil, _) => Nil
+        case (_, Nil) => Nil
+        case (Cons(h1, t1), Cons(h2, t2)) => Cons(f(h1, h2), zipWith(t1, t2)(f))
       }
 
     def startWith[A](l: List[A], prefix: List[A]): Boolean =
