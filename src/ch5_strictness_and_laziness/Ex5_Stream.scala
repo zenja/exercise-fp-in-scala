@@ -12,6 +12,12 @@ package ch5_strictness_and_laziness
  * Ex 5.2
  * Write the function take(n) for returning the first n elements of a Stream,
  * and drop(n) for skipping the first n elements of a Stream.
+ *
+ * Ex 5.3
+ * Write the function takeWhile for returning all starting elements of a Stream that
+ * match the given predicate.
+ *
+ * def takeWhile(p: A => Boolean): Stream[A]
  */
 object Ex5_Stream {
   sealed trait Stream[+A] {
@@ -46,6 +52,12 @@ object Ex5_Stream {
       this match {
         case Cons(h, t) if n > 1 => Stream.cons(h(), t().take(n - 1))
         case Cons(h, _) if n == 1 => Stream.cons(h(), Empty)
+        case _ => Empty
+      }
+
+    def takeWhile(p: A => Boolean): Stream[A] =
+      this match {
+        case Cons(h, t) if p(h()) => Stream.cons(h(), t() takeWhile p)
         case _ => Empty
       }
 
@@ -90,6 +102,11 @@ object Ex5_Stream {
     assert(s.drop(1).toList == List(1, 2), "drop test case 1")
     assert(s.drop(100).toList == List(), "drop test case 1")
     assert(s.drop(-1).toList == s.toList, "drop test case 1")
+
+    // Ex 5.3
+    assert(s.takeWhile(_ => false).toList == List(), "takeWhile test case 1")
+    assert(s.takeWhile(_ < 2).toList == List(0, 1), "takeWhile test case 2")
+    assert(s.takeWhile(_ < 10).toList == List(0, 1, 2), "takeWhile test case 3")
 
     println("All tests finished.")
   }
