@@ -75,6 +75,15 @@ package ch5_strictness_and_laziness
  * For instance, Stream(1,2,3) startsWith Stream(1,2) would be true.
  *
  * def startsWith[A](s: Stream[A]): Boolean
+ *
+ * Ex 5.15
+ * Implement tails using unfold.
+ * For a given Stream, tails returns the Stream of suffixes of the input sequence,
+ * starting with the original Stream.
+ * For example, given Stream(1,2,3),
+ * it would return Stream(Stream(1,2,3), Stream(2,3), Stream(3), Stream()).
+ *
+ * def tails: Stream[Stream[A]]
  */
 object Ex5_Stream {
   sealed trait Stream[+A] {
@@ -227,6 +236,18 @@ object Ex5_Stream {
         case (Some(a), Some(b)) => a == b
         // in solution: case (h,h2) => h == h2
       }
+
+    def tails(): Stream[Stream[A]] =
+      /* my wrong answer:
+      Stream.unfold(this) {
+        case Cons(h, t) => Some(t(), t())
+        case _ => None
+      }
+      */
+      Stream.unfold(this) {
+        case Empty => None
+        case s => Some(s, s drop 1)
+      } append Stream(Stream.empty)
   }
 
   case class Cons[+A](h: () => A, t: () => Stream[A]) extends Stream[A]
@@ -379,6 +400,10 @@ object Ex5_Stream {
 
     // Ex 5.14
     assert(s2.startsWith(s3), "startsWith test case 1")
+
+    // Ex 5.15
+    assert(s.tails().toList.length == 4, "tails test case 1")
+    assert(es.tails().toList.length == 1, "tails test case 2")
 
     println("All tests finished.")
   }
