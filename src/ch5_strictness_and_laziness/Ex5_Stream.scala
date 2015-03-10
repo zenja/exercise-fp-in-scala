@@ -58,6 +58,9 @@ package ch5_strictness_and_laziness
  * both the next state and the next value in the generated stream.
  *
  * def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A]
+ *
+ * Ex 5.12
+ * Write fibs, from, constant, and ones in terms of unfold.
  */
 object Ex5_Stream {
   sealed trait Stream[+A] {
@@ -198,7 +201,19 @@ object Ex5_Stream {
         case None => Empty
         case Some((a, s)) => Stream.cons(a, unfold(s)(f))
       }
-  }
+
+    def fibsViaUnfold(): Stream[Int] =
+      unfold((0, 1)){case (a,b) => Some((a, (b, a+b)))}
+
+    def fromViaUnfold(n: Int): Stream[Int] =
+      unfold(n)(n => Some(n, n+1))
+
+    def constantViaUnfold[A](a: A): Stream[A] =
+      unfold(a)(_ => Some(a, a))
+
+    def onesViaUnfold(): Stream[Int] =
+      unfold(1)(_ => Some(1, 1))
+}
 
   def main(args: Array[String]): Unit = {
     val s: Stream[Int] = Stream.cons(0, Stream.cons(1, Stream.cons(2, Empty)))
@@ -265,6 +280,15 @@ object Ex5_Stream {
 
     // Ex 5.11
     // check by Ex 5.12
+
+    // Ex 5.12
+    assert(Stream.fibsViaUnfold().take(8).toList == List(0, 1, 1, 2, 3, 5, 8, 13), "fibsViaUnfold test case 1")
+
+    assert(Stream.fromViaUnfold(5).take(3).toList == List(5, 6, 7), "fromViaUnfold test case 1")
+
+    assert(Stream.constantViaUnfold(9).take(3).toList == List(9, 9, 9), "constantViaUnfold test case 1")
+
+    assert(Stream.onesViaUnfold().take(5).toList == List(1, 1, 1, 1, 1), "onesViaUnfold test case 1")
 
     println("All tests finished.")
   }
