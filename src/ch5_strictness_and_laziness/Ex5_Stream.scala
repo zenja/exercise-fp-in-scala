@@ -84,6 +84,23 @@ package ch5_strictness_and_laziness
  * it would return Stream(Stream(1,2,3), Stream(2,3), Stream(3), Stream()).
  *
  * def tails: Stream[Stream[A]]
+ *
+ * Ex 5.16
+ * Hard: Generalize tails to the function scanRight,
+ * which is like a foldRight that returns a stream of the intermediate results.
+ *
+ * For example:
+ *
+ *      scala> Stream(1,2,3).scanRight(0)(_ + _).toList
+ *      res0: List[Int] = List(6,5,3,0)
+ *
+ * This example should be equivalent to the expression List(1+2+3+0, 2+3+0, 3+0, 0).
+ * Your function should reuse intermediate results so that traversing a Stream
+ * with n elements always takes time linear in n.
+ * Can it be implemented using unfold? How, or why not?
+ * Could it be implemented using another function we’ve written?
+ *
+
  */
 object Ex5_Stream {
   sealed trait Stream[+A] {
@@ -143,6 +160,26 @@ object Ex5_Stream {
         case Cons(h,t) => f(h(), t().foldRight(z)(f))
         case _ => z
       }
+
+    def scanRight[B](z: => B)(f: (A, => B) => B): Stream[B] =
+      // my inefficient solution:
+      // this.tails() map (t => t.foldRight(z)((a, b) => f(a, b)))
+      /*
+        The function can't be implemented using `unfold`,
+        since `unfold` generates elements of the `Stream` from left to right.
+        It can be implemented using `foldRight` though.
+
+        The implementation is just a `foldRight` that keeps the accumulated value and the stream of intermediate results,
+        which we `cons` onto during each iteration.
+        When writing folds, it's common to have more state in the fold than is needed to compute the result.
+        Here, we simply extract the accumulated list once finished.
+      */
+      foldRight((z, Stream(z)))((a, p0) => {
+        // p0 is passed by-name and used in by-name args in f and cons. So use lazy val to ensure only one evaluation...
+        lazy val p1 = p0
+        val b2 = f(a, p1._1)
+        (b2, Stream.cons(b2, p1._2))
+      })._2
 
     def exists(p: A => Boolean): Boolean =
       this match {
@@ -404,6 +441,9 @@ object Ex5_Stream {
     // Ex 5.15
     assert(s.tails().toList.length == 4, "tails test case 1")
     assert(es.tails().toList.length == 1, "tails test case 2")
+
+    // Ex 5.16
+    assert(s.scanRight(0)(_ + _).toList == List(3, 3, 2, 0), "scanRight test case 1")
 
     println("All tests finished.")
   }
