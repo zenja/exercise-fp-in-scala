@@ -40,6 +40,11 @@ package ch5_strictness_and_laziness
  * Generalize ones slightly to the function constant, which returns an infinite Stream of a given value.
  *
  * def constant[A](a: A): Stream[A]
+ *
+ * Ex 5.9
+ * Write a function that generates an infinite stream of integers, starting from n, then n + 1, n + 2, and so on.
+ *
+ * def from(n: Int): Stream[Int]
  */
 object Ex5_Stream {
   sealed trait Stream[+A] {
@@ -163,8 +168,11 @@ object Ex5_Stream {
       // note that "lazy" must be added or it won't compile for the reason:
       // "forward reference extends over definition of value s"
       lazy val s: Stream[A] = Stream.cons(a, s)
-      return s
+      s
     }
+
+    def from(n: Int): Stream[Int] =
+      Stream.cons(n, from(n + 1))
   }
 
   def main(args: Array[String]): Unit = {
@@ -223,6 +231,9 @@ object Ex5_Stream {
 
     // Ex 5.8
     assert(Stream.constant(9).take(3).toList == List(9, 9, 9), "constant test case 1")
+
+    // Ex 5.9
+    assert(Stream.from(5).take(3).toList == List(5, 6, 7), "from test case 1")
 
     println("All tests finished.")
   }
