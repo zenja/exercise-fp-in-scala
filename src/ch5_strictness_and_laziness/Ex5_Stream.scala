@@ -35,6 +35,11 @@ package ch5_strictness_and_laziness
  * Ex 5.7
  * Implement map, filter, append, and flatMap using foldRight.
  * The append method should be non-strict in its argument.
+ *
+ * Ex 5.8
+ * Generalize ones slightly to the function constant, which returns an infinite Stream of a given value.
+ *
+ * def constant[A](a: A): Stream[A]
  */
 object Ex5_Stream {
   sealed trait Stream[+A] {
@@ -153,6 +158,13 @@ object Ex5_Stream {
 
     def apply[A](as: A*): Stream[A] =
       if (as.isEmpty) empty else cons(as.head, apply(as.tail: _*))
+
+    def constant[A](a: A): Stream[A] = {
+      // note that "lazy" must be added or it won't compile for the reason:
+      // "forward reference extends over definition of value s"
+      lazy val s: Stream[A] = Stream.cons(a, s)
+      return s
+    }
   }
 
   def main(args: Array[String]): Unit = {
@@ -208,6 +220,9 @@ object Ex5_Stream {
 
     assert(s.flatMap(x => Stream.cons(x+1, Stream.cons(x+2, Empty))).toList == List(1, 2, 2, 3, 3, 4), "flatMap test case 1")
     assert(es.flatMap(x => Stream.cons(x+1, Stream.cons(x+2, Empty))).toList == List(), "flatMap test case 2")
+
+    // Ex 5.8
+    assert(Stream.constant(9).take(3).toList == List(9, 9, 9), "constant test case 1")
 
     println("All tests finished.")
   }
