@@ -25,6 +25,9 @@ package ch5_strictness_and_laziness
  * non-matching value.
  *
  * def forAll(p: A => Boolean): Boolean
+ *
+ * Ex 5.5
+ * Use foldRight to implement takeWhile.
  */
 object Ex5_Stream {
   sealed trait Stream[+A] {
@@ -94,6 +97,11 @@ object Ex5_Stream {
     // this terminates the traversal as soon as a nonmatching element is found.
     def forAll(p: A => Boolean): Boolean =
       foldRight(true)((a, b) => p(a) && b)
+
+    def takeWhileFR(p: A => Boolean): Stream[A] =
+      foldRight(Stream.empty[A])((h, t) =>
+        if (p(h)) Stream.cons(h, t)
+        else Stream.empty[A])
   }
 
   case class Cons[+A](h: () => A, t: () => Stream[A]) extends Stream[A]
@@ -119,6 +127,7 @@ object Ex5_Stream {
     // Ex 5.1
     assert(s.toListNotTailRecursive == List(0, 1, 2), "toListNotTailRecursive test case 1")
     assert(es.toListNotTailRecursive == List(), "toListNotTailRecursive test case 2")
+
     assert(s.toList == List(0, 1, 2), "toList test case 1")
     assert(es.toList == List(), "toList test case 2")
 
@@ -128,8 +137,8 @@ object Ex5_Stream {
     assert(es.take(1).toList == List(), "take test case 3")
 
     assert(s.drop(1).toList == List(1, 2), "drop test case 1")
-    assert(s.drop(100).toList == List(), "drop test case 1")
-    assert(s.drop(-1).toList == s.toList, "drop test case 1")
+    assert(s.drop(100).toList == List(), "drop test case 2")
+    assert(s.drop(-1).toList == s.toList, "drop test case 3")
 
     // Ex 5.3
     assert(s.takeWhile(_ => false).toList == List(), "takeWhile test case 1")
@@ -140,6 +149,11 @@ object Ex5_Stream {
     assert(s.forAll(_ < 10) == true, "forAll test case 1")
     assert(s.forAll(_ < 2) == false, "forAll test case 2")
     assert(es.forAll(_ == 999) == true, "forAll test case 3")
+
+    // Ex 5.5
+    assert(s.takeWhileFR(_ < 10).toList == List(0, 1, 2), "takeWhileFR test case 1")
+    assert(s.takeWhileFR(_ < 0).toList == List(), "takeWhileFR test case 2")
+    assert(s.takeWhileFR(_ < 2).toList == List(0, 1), "takeWhileFR test case 3")
 
     println("All tests finished.")
   }
