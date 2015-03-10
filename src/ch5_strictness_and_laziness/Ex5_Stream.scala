@@ -45,6 +45,9 @@ package ch5_strictness_and_laziness
  * Write a function that generates an infinite stream of integers, starting from n, then n + 1, n + 2, and so on.
  *
  * def from(n: Int): Stream[Int]
+ *
+ * Ex 5.10
+ * Write a function fibs that generates the infinite stream of Fibonacci numbers: 0, 1, 1, 2, 3, 5, 8, and so on.
  */
 object Ex5_Stream {
   sealed trait Stream[+A] {
@@ -171,6 +174,13 @@ object Ex5_Stream {
       s
     }
 
+    def fibs(): Stream[Int] = {
+      def go(a: Int, b: Int): Stream[Int] =
+        Stream.cons(a, go(b, a + b))
+      go(0, 1)
+    }
+
+
     def from(n: Int): Stream[Int] =
       Stream.cons(n, from(n + 1))
   }
@@ -234,6 +244,9 @@ object Ex5_Stream {
 
     // Ex 5.9
     assert(Stream.from(5).take(3).toList == List(5, 6, 7), "from test case 1")
+
+    // Ex 5.10
+    assert(Stream.fibs().take(8).toList == List(0, 1, 1, 2, 3, 5, 8, 13), "fibs test case 1")
 
     println("All tests finished.")
   }
