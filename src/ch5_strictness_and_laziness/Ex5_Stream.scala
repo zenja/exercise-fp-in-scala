@@ -68,6 +68,13 @@ package ch5_strictness_and_laziness
  * it uses Option to indicate whether each stream has been exhausted.
  *
  * def zipAll[B](s2: Stream[B]): Stream[(Option[A],Option[B])]
+ *
+ * Ex 5.14
+ * Hard: Implement startsWith using functions you’ve written.
+ * It should check if one Stream is a prefix of another.
+ * For instance, Stream(1,2,3) startsWith Stream(1,2) would be true.
+ *
+ * def startsWith[A](s: Stream[A]): Boolean
  */
 object Ex5_Stream {
   sealed trait Stream[+A] {
@@ -214,6 +221,12 @@ object Ex5_Stream {
         case (_, Cons(h2, t2)) => Some((None, Some(h2())), (Empty, t2()))
         case _ => None
       }
+
+    def startsWith[A](s: Stream[A]): Boolean =
+      zipAll(s).takeWhile(!_._2.isEmpty) forAll {
+        case (Some(a), Some(b)) => a == b
+        // in solution: case (h,h2) => h == h2
+      }
   }
 
   case class Cons[+A](h: () => A, t: () => Stream[A]) extends Stream[A]
@@ -294,9 +307,9 @@ object Ex5_Stream {
     assert(s.takeWhile(_ < 10).toList == List(0, 1, 2), "takeWhile test case 3")
 
     // Ex 5.4
-    assert(s.forAll(_ < 10) == true, "forAll test case 1")
-    assert(s.forAll(_ < 2) == false, "forAll test case 2")
-    assert(es.forAll(_ == 999) == true, "forAll test case 3")
+    assert(s.forAll(_ < 10), "forAll test case 1")
+    assert(!s.forAll(_ < 2), "forAll test case 2")
+    assert(es.forAll(_ == 999), "forAll test case 3")
 
     // Ex 5.5
     assert(s.takeWhileFR(_ < 10).toList == List(0, 1, 2), "takeWhileFR test case 1")
@@ -363,6 +376,9 @@ object Ex5_Stream {
 
     assert(s.zipAll(s3).toList == List((Some(0), Some(0)), (Some(1), Some(10)), (Some(2), None)), "zipAll test case 1")
     assert(s.zipAll(es).toList == List((Some(0), None), (Some(1), None), (Some(2), None)), "zipAll test case 1")
+
+    // Ex 5.14
+    assert(s2.startsWith(s3), "startsWith test case 1")
 
     println("All tests finished.")
   }
