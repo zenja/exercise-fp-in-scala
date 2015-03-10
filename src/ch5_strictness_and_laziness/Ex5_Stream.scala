@@ -18,6 +18,13 @@ package ch5_strictness_and_laziness
  * match the given predicate.
  *
  * def takeWhile(p: A => Boolean): Stream[A]
+ *
+ * Ex 5.4
+ * Implement forAll, which checks that all elements in the Stream match a given predicate.
+ * Your implementation should terminate the traversal as soon as it encounters a
+ * non-matching value.
+ *
+ * def forAll(p: A => Boolean): Boolean
  */
 object Ex5_Stream {
   sealed trait Stream[+A] {
@@ -66,6 +73,27 @@ object Ex5_Stream {
         case Cons(_, t) if n >= 1 => t().drop(n - 1)
         case _ => this
       }
+
+    def foldRight[B](z: => B)(f: (A, => B) => B): B =
+      this match {
+        case Cons(h,t) => f(h(), t().foldRight(z)(f))
+        case _ => z
+      }
+
+    def exists(p: A => Boolean): Boolean =
+      this match {
+        case Cons(h, t) => p(h()) || t().exists(p)
+        case _ => false
+      }
+
+    // implement exists with foldRight
+    def existsFR(p: A => Boolean): Boolean =
+      foldRight(false)((a, b) => p(a) || b)
+
+    // Since `&&` is non-strict in its second argument,
+    // this terminates the traversal as soon as a nonmatching element is found.
+    def forAll(p: A => Boolean): Boolean =
+      foldRight(true)((a, b) => p(a) && b)
   }
 
   case class Cons[+A](h: () => A, t: () => Stream[A]) extends Stream[A]
@@ -107,6 +135,11 @@ object Ex5_Stream {
     assert(s.takeWhile(_ => false).toList == List(), "takeWhile test case 1")
     assert(s.takeWhile(_ < 2).toList == List(0, 1), "takeWhile test case 2")
     assert(s.takeWhile(_ < 10).toList == List(0, 1, 2), "takeWhile test case 3")
+
+    // Ex 5.4
+    assert(s.forAll(_ < 10) == true, "forAll test case 1")
+    assert(s.forAll(_ < 2) == false, "forAll test case 2")
+    assert(es.forAll(_ == 999) == true, "forAll test case 3")
 
     println("All tests finished.")
   }
