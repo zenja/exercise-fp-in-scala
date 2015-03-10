@@ -28,6 +28,9 @@ package ch5_strictness_and_laziness
  *
  * Ex 5.5
  * Use foldRight to implement takeWhile.
+ *
+ * Ex 5.6
+ * Hard: Implement headOption using foldRight.
  */
 object Ex5_Stream {
   sealed trait Stream[+A] {
@@ -46,6 +49,11 @@ object Ex5_Stream {
       }
 
       go(this, List()).reverse
+    }
+
+    def headOption: Option[A] = this match {
+      case Empty => None
+      case Cons(h, t) => Some(h())
     }
 
     def take(n: Int): Stream[A] =
@@ -102,6 +110,14 @@ object Ex5_Stream {
       foldRight(Stream.empty[A])((h, t) =>
         if (p(h)) Stream.cons(h, t)
         else Stream.empty[A])
+
+    def headOptionFR(): Option[A] = {
+      /* my answer:
+      val none: Option[A] = None
+      foldRight(none)((a, o) => Some(a))
+      */
+      foldRight(None: Option[A])((a, _) => Some(a))
+    }
   }
 
   case class Cons[+A](h: () => A, t: () => Stream[A]) extends Stream[A]
@@ -154,6 +170,10 @@ object Ex5_Stream {
     assert(s.takeWhileFR(_ < 10).toList == List(0, 1, 2), "takeWhileFR test case 1")
     assert(s.takeWhileFR(_ < 0).toList == List(), "takeWhileFR test case 2")
     assert(s.takeWhileFR(_ < 2).toList == List(0, 1), "takeWhileFR test case 3")
+
+    // Ex 5.6
+    assert(s.headOptionFR() == Option(0), "headOptionFR test case 1")
+    assert(es.headOptionFR() == None, "headOptionFR test case 2")
 
     println("All tests finished.")
   }
