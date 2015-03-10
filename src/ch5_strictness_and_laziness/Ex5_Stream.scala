@@ -31,6 +31,10 @@ package ch5_strictness_and_laziness
  *
  * Ex 5.6
  * Hard: Implement headOption using foldRight.
+ *
+ * Ex 5.7
+ * Implement map, filter, append, and flatMap using foldRight.
+ * The append method should be non-strict in its argument.
  */
 object Ex5_Stream {
   sealed trait Stream[+A] {
@@ -118,6 +122,21 @@ object Ex5_Stream {
       */
       foldRight(None: Option[A])((a, _) => Some(a))
     }
+
+    def map[B](f: A => B): Stream[B] =
+      foldRight(Stream.empty[B])((a, bs) => Stream.cons(f(a), bs))
+
+    def filter(p: A => Boolean): Stream[A] =
+      // my wrong answer:
+      // foldRight(Stream.empty[A])((h, t) => if (p(h)) Stream.cons(h, t.filter(p)) else t.filter(p))
+      foldRight(Stream.empty[A])((h, t) => if (p(h)) Stream.cons(h, t) else t)
+
+    // append to the end of the stream
+    def append[B>:A](s: => Stream[B]): Stream[B] =
+      foldRight(s)((h, t) => Stream.cons(h, t))
+
+    def flatMap[B](f: A => Stream[B]): Stream[B] =
+      foldRight(Stream.empty[B])((h, t) => f(h) append t)
   }
 
   case class Cons[+A](h: () => A, t: () => Stream[A]) extends Stream[A]
@@ -174,6 +193,21 @@ object Ex5_Stream {
     // Ex 5.6
     assert(s.headOptionFR() == Option(0), "headOptionFR test case 1")
     assert(es.headOptionFR() == None, "headOptionFR test case 2")
+
+    // Ex 5.7
+    assert(s.map(_ * 2).toList == List(0, 2, 4), "map test case 1")
+    assert(es.map(_ * 2).toList == List(), "map test case 2")
+
+    assert(s.filter(_ < 10).toList == List(0, 1, 2), "filter test case 1")
+    assert(s.filter(_ < 2).toList == List(0, 1), "filter test case 2")
+    assert(es.filter(_ < 100).toList == List(), "filter test case 3")
+
+    assert(s.append(s.take(2)).toList == List(0, 1, 2, 0, 1), "append test case 1")
+    assert(es.append(s.take(2)).toList == List(0, 1), "append test case 2")
+    assert(s.append(es).toList == List(0, 1, 2), "append test case 3")
+
+    assert(s.flatMap(x => Stream.cons(x+1, Stream.cons(x+2, Empty))).toList == List(1, 2, 2, 3, 3, 4), "flatMap test case 1")
+    assert(es.flatMap(x => Stream.cons(x+1, Stream.cons(x+2, Empty))).toList == List(), "flatMap test case 2")
 
     println("All tests finished.")
   }
