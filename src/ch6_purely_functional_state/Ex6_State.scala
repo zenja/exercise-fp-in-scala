@@ -47,6 +47,11 @@ package ch6_purely_functional_state
  * repeated n times.
  *
  * def sequence[A](fs: List[Rand[A]]): Rand[List[A]]
+ *
+ * Ex 6.8
+ * Implement flatMap, and then use it to implement nonNegativeLessThan.
+ *
+ * def flatMap[A,B](f: Rand[A])(g: A => Rand[B]): Rand[B]
  */
 object Ex6_State {
   trait RNG {
@@ -139,6 +144,27 @@ object Ex6_State {
 
     def _ints(count: Int): Rand[List[Int]] =
       sequence(List.fill(count)(int))
+
+    def nonNegativeLessThan(n: Int): Rand[Int] = { rng =>
+      val (i, rng2) = nonNegativeInt(rng)
+      val mod = i % n
+      if (i + (n-1) - mod >= 0)
+        (mod, rng2)
+      else nonNegativeLessThan(n)(rng)
+    }
+
+    def flatMap[A,B](f: Rand[A])(g: A => Rand[B]): Rand[B] =
+      rng => {
+        val (a, r1) = f(rng)
+        g(a)(r1)
+      }
+
+    def nonNegativeLessThanViaFlatMap(n: Int): Rand[Int] =
+      flatMap(nonNegativeInt) { i =>
+        val mod = i % n
+        if (i + (n-1) - mod >= 0) unit(mod) else nonNegativeLessThan(n)
+      }
+
   }
 
   def main(args: Array[String]): Unit = {
@@ -169,6 +195,9 @@ object Ex6_State {
 
     // Ex 6.7
     assert(RNG.sequence(List[Rand[Double]](RNG.double, RNG.double, RNG.double))(rng)._1(2) == RNG.double3(rng)._1._3, "sequence test case 1")
+
+    // Ex 6.8
+    assert(RNG.nonNegativeLessThan(10)(rng)._1 == RNG.nonNegativeLessThanViaFlatMap(10)(rng)._1, "flatMap test case 1")
   }
 }
 
