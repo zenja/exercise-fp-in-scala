@@ -23,6 +23,11 @@ package ch6_purely_functional_state
  * def intDouble(rng: RNG): ((Int,Double), RNG)
  * def doubleInt(rng: RNG): ((Double,Int), RNG)
  * def double3(rng: RNG): ((Double,Double,Double), RNG)
+ *
+ * Ex 6.4
+ * Write a function to generate a list of random integers.
+ *
+ * def ints(count: Int)(rng: RNG): (List[Int], RNG)
  */
 object Ex6_State {
   trait RNG {
@@ -66,6 +71,15 @@ object Ex6_State {
       val (d3, r3) = double(r2)
       ((d1, d2, d3), r3)
     }
+
+    def ints(count: Int)(rng: RNG): (List[Int], RNG) =
+      if (count > 0) {
+        val (i, r) = rng.nextInt
+        val (l, rr) = ints(count - 1)(r)
+        (i :: l, rr)
+      } else {
+        (Nil, rng)
+      }
   }
 
   def main(args: Array[String]): Unit = {
@@ -84,6 +98,9 @@ object Ex6_State {
     assert(RNG.intDouble(rng)._1._1 == RNG.doubleInt(rng)._1._2, "intDouble/doubleInt test case 1")
     assert(RNG.intDouble(rng)._1._2 == RNG.doubleInt(rng)._1._1, "intDouble/doubleInt test case 2")
     assert(RNG.double(RNG.double(RNG.double(rng)._2)._2)._1 == RNG.double3(rng)._1._3, "double3 test case 1")
+
+    // Ex 6.4
+    assert(RNG.ints(10)(rng)._1.length == 10, "ints test case 1")
   }
 }
 
