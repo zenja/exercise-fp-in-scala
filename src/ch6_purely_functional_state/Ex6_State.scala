@@ -38,6 +38,15 @@ package ch6_purely_functional_state
  * a new action that combines them:
  *
  * def map2[A,B,C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C]
+ *
+ * Ex 6.7
+ * Hard: If you can combine two RNG transitions, you should be able to combine a whole
+ * list of them. Implement sequence for combining a List of transitions into a single
+ * transition. Use it to reimplement the ints function you wrote before. For the latter,
+ * you can use the standard library function List.fill(n)(x) to make a list with x
+ * repeated n times.
+ *
+ * def sequence[A](fs: List[Rand[A]]): Rand[List[A]]
  */
 object Ex6_State {
   trait RNG {
@@ -118,9 +127,13 @@ object Ex6_State {
       */
       rng => {
         val (a, r1) = ra(rng)
-        val (b, r2) = rb(rng)
+        val (b, r2) = rb(r1)
         (f(a, b), r2)
       }
+
+    // copied from fpinscala GitHub
+    def sequence[A](fs: List[Rand[A]]): Rand[List[A]] =
+      fs.foldRight(unit(List[A]()))((sa, acc) => map2(sa, acc)(_ :: _))
   }
 
   def main(args: Array[String]): Unit = {
@@ -148,6 +161,9 @@ object Ex6_State {
 
     // Ex 6.6
     assert(RNG.map2(RNG.nonNegativeEven, RNG.nonNegativeEven)(_ + _)(rng)._1 % 2 == 0, "map2 test case 1")
+
+    // Ex 6.7
+    assert(RNG.sequence(List[Rand[Double]](RNG.double, RNG.double, RNG.double))(rng)._1(2) == RNG.double3(rng)._1._3, "sequence test case 1")
   }
 }
 
