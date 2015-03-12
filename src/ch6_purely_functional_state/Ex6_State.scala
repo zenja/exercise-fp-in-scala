@@ -14,6 +14,15 @@ package ch6_purely_functional_state
  * x.toDouble to convert an x: Int to a Double.
  *
  * def double(rng: RNG): (Double, RNG)
+ *
+ * Ex 6.3
+ * Write functions to generate an (Int, Double) pair, a (Double, Int) pair, and a
+ * (Double, Double, Double) 3-tuple. You should be able to reuse the functions you’ve
+ * already written.
+ *
+ * def intDouble(rng: RNG): ((Int,Double), RNG)
+ * def doubleInt(rng: RNG): ((Double,Int), RNG)
+ * def double3(rng: RNG): ((Double,Double,Double), RNG)
  */
 object Ex6_State {
   trait RNG {
@@ -39,6 +48,24 @@ object Ex6_State {
       val (i, r) = nonNegativeInt(rng)
       (i/(Int.MaxValue.toDouble + 1), r)
     }
+
+    def intDouble(rng: RNG): ((Int,Double), RNG) = {
+      val (i, r1) = rng.nextInt
+      val (d, r2) = double(r1)
+      ((i, d), r2)
+    }
+
+    def doubleInt(rng: RNG): ((Double,Int), RNG) = {
+      val ((i, d), r) = intDouble(rng)
+      ((d, i), r)
+    }
+
+    def double3(rng: RNG): ((Double,Double,Double), RNG) = {
+      val (d1, r1) = double(rng)
+      val (d2, r2) = double(r1)
+      val (d3, r3) = double(r2)
+      ((d1, d2, d3), r3)
+    }
   }
 
   def main(args: Array[String]): Unit = {
@@ -52,6 +79,11 @@ object Ex6_State {
     assert(RNG.double(rng)._1 >= 0 && RNG.double(rng)._1 < 1, "double test case 1")
     assert(RNG.double(rng)._1 == RNG.double(rng)._1, "double test case 2")
     println("All tests finished.")
+
+    // Ex 6.3
+    assert(RNG.intDouble(rng)._1._1 == RNG.doubleInt(rng)._1._2, "intDouble/doubleInt test case 1")
+    assert(RNG.intDouble(rng)._1._2 == RNG.doubleInt(rng)._1._1, "intDouble/doubleInt test case 2")
+    assert(RNG.double(RNG.double(RNG.double(rng)._2)._2)._1 == RNG.double3(rng)._1._3, "double3 test case 1")
   }
 }
 
