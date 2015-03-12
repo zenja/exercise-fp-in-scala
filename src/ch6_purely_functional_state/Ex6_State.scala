@@ -134,6 +134,11 @@ object Ex6_State {
     // copied from fpinscala GitHub
     def sequence[A](fs: List[Rand[A]]): Rand[List[A]] =
       fs.foldRight(unit(List[A]()))((sa, acc) => map2(sa, acc)(_ :: _))
+
+    val int: Rand[Int] = _.nextInt
+
+    def _ints(count: Int): Rand[List[Int]] =
+      sequence(List.fill(count)(int))
   }
 
   def main(args: Array[String]): Unit = {
