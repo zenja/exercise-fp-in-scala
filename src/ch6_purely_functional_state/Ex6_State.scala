@@ -52,6 +52,11 @@ package ch6_purely_functional_state
  * Implement flatMap, and then use it to implement nonNegativeLessThan.
  *
  * def flatMap[A,B](f: Rand[A])(g: A => Rand[B]): Rand[B]
+ *
+ * Ex 6.9
+ * Reimplement map and map2 in terms of flatMap.
+ * The fact that this is possible is what we’re referring to
+ * when we say that flatMap is more powerful than map and map2.
  */
 object Ex6_State {
   trait RNG {
@@ -165,6 +170,14 @@ object Ex6_State {
         if (i + (n-1) - mod >= 0) unit(mod) else nonNegativeLessThan(n)
       }
 
+    def mapFM[A,B](s: Rand[A])(f: A => B): Rand[B] =
+      flatMap(s)(a => unit(f(a)))
+
+    // copied from fpinscala GitHub
+    // TODO understand it
+    def map2FM[A,B,C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] =
+      flatMap(ra)(a => map(rb)(b => f(a, b)))
+
   }
 
   def main(args: Array[String]): Unit = {
@@ -198,6 +211,10 @@ object Ex6_State {
 
     // Ex 6.8
     assert(RNG.nonNegativeLessThan(10)(rng)._1 == RNG.nonNegativeLessThanViaFlatMap(10)(rng)._1, "flatMap test case 1")
+
+    // Ex 6.9
+    assert(RNG.mapFM(RNG.double)(_ * 2)(rng) == RNG.map(RNG.double)(_ * 2)(rng), "mapFM test case 1")
+    assert(RNG.map2FM(RNG.double, RNG.nonNegativeEven)(_ * _)(rng) == RNG.map2(RNG.double, RNG.nonNegativeEven)(_ * _)(rng), "map2FM test case 1")
   }
 }
 
