@@ -28,11 +28,16 @@ package ch6_purely_functional_state
  * Write a function to generate a list of random integers.
  *
  * def ints(count: Int)(rng: RNG): (List[Int], RNG)
+ *
+ * Ex 6.5
+ * Use map to reimplement double in a more elegant way. See exercise 6.2.
  */
 object Ex6_State {
   trait RNG {
     def nextInt: (Int, RNG)
   }
+
+  type Rand[+A] = RNG => (A, RNG)
 
   case class SimpleRNG(seed: Long) extends RNG {
     def nextInt: (Int, RNG) = {
@@ -80,6 +85,21 @@ object Ex6_State {
       } else {
         (Nil, rng)
       }
+
+    def unit[A](a: A): Rand[A] =
+      rng => (a, rng)
+
+    def map[A,B](s: Rand[A])(f: A => B): Rand[B] =
+      rng => {
+        val (a, rng2) = s(rng)
+        (f(a), rng2)
+      }
+
+    def nonNegativeEven: Rand[Int] =
+      map(nonNegativeInt)(i => i - i % 2)
+
+    def doubleViaMap: Rand[Double] =
+      map(nonNegativeInt)(i => i/(Int.MaxValue.toDouble + 1))
   }
 
   def main(args: Array[String]): Unit = {
@@ -101,6 +121,9 @@ object Ex6_State {
 
     // Ex 6.4
     assert(RNG.ints(10)(rng)._1.length == 10, "ints test case 1")
+
+    // Ex 6.5
+    assert(RNG.doubleViaMap(rng) == RNG.double(rng), "doubleViaMap test case 1")
   }
 }
 
