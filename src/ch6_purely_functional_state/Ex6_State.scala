@@ -31,6 +31,13 @@ package ch6_purely_functional_state
  *
  * Ex 6.5
  * Use map to reimplement double in a more elegant way. See exercise 6.2.
+ *
+ * Ex 6.6
+ * Write the implementation of map2 based on the following signature. This function
+ * takes two actions, ra and rb, and a function f for combining their results, and returns
+ * a new action that combines them:
+ *
+ * def map2[A,B,C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C]
  */
 object Ex6_State {
   trait RNG {
@@ -100,6 +107,20 @@ object Ex6_State {
 
     def doubleViaMap: Rand[Double] =
       map(nonNegativeInt)(i => i/(Int.MaxValue.toDouble + 1))
+
+    def map2[A,B,C](ra: Rand[A], rb: Rand[B])(f: (A, B) => C): Rand[C] =
+      /* my wrong answer:
+      rng => {
+        val (a, rnga) = ra(rng)
+        val (b, rngb) = rb(rng)
+        (f(a, b), rnga)
+      }
+      */
+      rng => {
+        val (a, r1) = ra(rng)
+        val (b, r2) = rb(rng)
+        (f(a, b), r2)
+      }
   }
 
   def main(args: Array[String]): Unit = {
@@ -124,6 +145,9 @@ object Ex6_State {
 
     // Ex 6.5
     assert(RNG.doubleViaMap(rng) == RNG.double(rng), "doubleViaMap test case 1")
+
+    // Ex 6.6
+    assert(RNG.map2(RNG.nonNegativeEven, RNG.nonNegativeEven)(_ + _)(rng)._1 % 2 == 0, "map2 test case 1")
   }
 }
 
