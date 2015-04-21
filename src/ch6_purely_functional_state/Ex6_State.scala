@@ -57,6 +57,11 @@ package ch6_purely_functional_state
  * Reimplement map and map2 in terms of flatMap.
  * The fact that this is possible is what we’re referring to
  * when we say that flatMap is more powerful than map and map2.
+ *
+ * Ex 6.10
+ * Generalize the functions unit, map, map2, flatMap, and sequence.
+ * Add them as methods on the State case class where possible.
+ * Otherwise you should put them in a State companion object.
  */
 object Ex6_State {
   trait RNG {
@@ -180,6 +185,68 @@ object Ex6_State {
 
   }
 
+  import State._
+
+  case class State[S, +A](run: S => (A, S)) {
+    def map[B](f: A => B): State[S, B] =
+      State(s => {
+        val (a, s1) = run(s)
+        (f(a), s1)
+      })
+
+    def mapFM[B](f: A => B): State[S, B] =
+      flatMap(a => unit(f(a)))
+
+    def map2[B, C](sb: State[S, B])(f: (A, B) => C): State[S, C] =
+      State(s => {
+        val (a, s1) = run(s)
+        val (b, s2) = sb.run(s1)
+        (f(a, b), s2)
+      })
+
+    def map2FM[B, C](sb: State[S, B])(f: (A, B) => C): State[S, C] =
+      flatMap(a => sb.map(b => f(a, b)))
+
+    def flatMap[B](f: A => State[S, B]): State[S, B] =
+      State(s => {
+        val (a, s1) = run(s)
+        f(a).run(s1)
+      })
+  }
+
+
+  object State {
+    type Rand[A] = State[RNG, A]
+
+    def unit[S, A](a: A): State[S, A] =
+      State(s => (a, s))
+
+    // TODO copied from github, understand it
+    // This implementation uses a loop internally and is the same recursion
+    // pattern as a left fold. It is quite common with left folds to build
+    // up a list in reverse order, then reverse it at the end.
+    // (We could also use a collection.mutable.ListBuffer internally.)
+    def sequence[S, A](sas: List[State[S, A]]): State[S, List[A]] = {
+      def go(s: S, actions: List[State[S,A]], acc: List[A]): (List[A],S) =
+        actions match {
+          case Nil => (acc.reverse,s)
+          case h :: t => h.run(s) match { case (a,s2) => go(s2, t, a :: acc) }
+        }
+      State((s: S) => go(s,sas,List()))
+    }
+
+    // TODO copied from github, understand it
+    // We can also write the loop using a left fold. This is tail recursive like the
+    // previous solution, but it reverses the list _before_ folding it instead of after.
+    // You might think that this is slower than the `foldRight` solution since it
+    // walks over the list twice, but it's actually faster! The `foldRight` solution
+    // technically has to also walk the list twice, since it has to unravel the call
+    // stack, not being tail recursive. And the call stack will be as tall as the list
+    // is long.
+    def sequenceViaFoldLeft[S,A](l: List[State[S, A]]): State[S, List[A]] =
+      l.reverse.foldLeft(unit[S, List[A]](List()))((acc, f) => f.map2(acc)( _ :: _ ))
+  }
+
   def main(args: Array[String]): Unit = {
     val rng = SimpleRNG(1)
 
@@ -215,6 +282,9 @@ object Ex6_State {
     // Ex 6.9
     assert(RNG.mapFM(RNG.double)(_ * 2)(rng) == RNG.map(RNG.double)(_ * 2)(rng), "mapFM test case 1")
     assert(RNG.map2FM(RNG.double, RNG.nonNegativeEven)(_ * _)(rng) == RNG.map2(RNG.double, RNG.nonNegativeEven)(_ * _)(rng), "map2FM test case 1")
+
+    // Ex 6.10
+    // ignored
   }
 }
 
