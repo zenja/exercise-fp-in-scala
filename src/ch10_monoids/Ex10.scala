@@ -75,10 +75,13 @@ object Ex10 {
     override def zero: Option[A] = None
   }
 
-  /// Ex 10.3 TODO not sure answer is right
+  /// Ex 10.3
 
   def endoMonoid[A]: Monoid[A => A] = new Monoid[A => A] {
     override def op(f1: (A) => A, f2: (A) => A): (A) => A = (a: A) => f1(f2(a))
+    // answer is:
+    //override def op(f1: (A) => A, f2: (A) => A): (A) => A = f1 compose f2
+    // which is more elegant
 
     override def zero: (A) => A = identity[A]
   }
@@ -86,14 +89,20 @@ object Ex10 {
   /// Ex 10.5
 
   def foldMap[A,B](as: List[A], m: Monoid[B])(f: A => B): B = {
-    as.map(f).foldLeft(m.zero)(m.op)
+    // my previous answer used map, which is actually not necessary:
+    //as.map(f).foldLeft(m.zero)(m.op)
+
+    as.foldLeft(m.zero)((b: B, a: A) => m.op(b, f(a)))
   }
 
   def foldMap2[A,B](as: List[A], m: Monoid[B])(f: A => B): B = {
-    as.map(f).foldRight(m.zero)(m.op)
+    // my previous answer used map, which is actually not necessary:
+    //as.map(f).foldRight(m.zero)(m.op)
+
+    as.foldRight(m.zero)((a: A, b: B) => m.op(f(a), b))
   }
 
-  /// Ex 10.6 TODO not sure if correct
+  /// Ex 10.6
 
   def foldRight[A](z: A)(as: List[A], f: (A, A) => A): A = {
     val monoid = new Monoid[A] {
@@ -101,17 +110,26 @@ object Ex10 {
       override def zero: A = z
     }
     foldMap[A, A](as, monoid)(identity[A])
+
+    // answer:
+    // foldMap(as, endoMonoid[B])(f.curried)(z)
   }
 
   def foldLeft[A](z: A)(as: List[A], f: (A, A) => A): A = {
     foldRight[A](z)(as, f)
+    // answer:
+    // foldMap(as, dual(endoMonoid[B]))(a => b => f(b, a))(z)
+    // for explanation plz refer to:
+    // https://github.com/fpinscala/fpinscala/blob/master/answers%2Fsrc%2Fmain%2Fscala%2Ffpinscala%2Fmonoids%2FMonoid.scala
   }
 
-  /// Ex 10.7 TODO not sure
+  /// Ex 10.7
 
   def foldMapV[A,B](v: IndexedSeq[A], m: Monoid[B])(f: A => B): B = {
-    if (v.size <= 2) {
-      foldMap[A,B](v.toList, m)(f)
+    if (v.isEmpty) {
+      m.zero
+    } else if (v.length == 1) {
+      f(v(0))
     } else {
       val firstPart: B = foldMapV[A,B](v.slice(0, v.size/2), m)(f)
       val secondPart: B = foldMapV[A,B](v.slice(v.size/2, v.size), m)(f)
